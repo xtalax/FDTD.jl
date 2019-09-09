@@ -60,7 +60,7 @@ Then you need to define where it will be applied:
 ```
 sourceindex = (2, [div(x.N,2), div(y.N,2), div(z.N,2)])
 ```
-The above will apply the source on the y (2nd) component of the E and H fields, at the location defined in the iterable.
+The above will apply the source on the `y` (2nd) component of the `E` and `H` fields, at the location defined in `sourceindex[2]`.
 It is also possible to use ranges and colons to apply the source to a region of the domain. to this end thee is a helper function `interior_range` that will return the part of the grid which is outside of the perfectly matched layer.
 
 ```
