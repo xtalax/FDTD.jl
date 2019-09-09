@@ -2,7 +2,7 @@ module FDTD
     using LinearAlgebra
     using Strided
     using DiscreteAxis
-
+    using ProgressMeter
     const EHTuple{T,N} = Tuple{Tuple{Array{T,N},Array{T,N},Array{T,N}},Tuple{Array{T,N},Array{T,N},Array{T,N}}}
     const VecArray{T,N} = Tuple{Array{T,N},Array{T,N},Array{T,N}}
 
