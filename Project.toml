@@ -1,7 +1,7 @@
 name = "FDTD"
-uuid = "f32c464a-6232-4643-9ba2-b0fbf2656cfc"
-authors = ["Alex Jones"]
-version = "0.1"
+uuid = "3d9649a0-b41e-46e5-a560-de98adc033b1"
+authors = ["jones "]
+version = "0.1.0"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
