@@ -1,13 +1,12 @@
 module FDTD
-
     using LinearAlgebra
-    using ProgressMeter
     using Strided
     using DiscreteAxis
-
+    using ProgressMeter
     const EHTuple{T,N} = Tuple{Tuple{Array{T,N},Array{T,N},Array{T,N}},Tuple{Array{T,N},Array{T,N},Array{T,N}}}
     const VecArray{T,N} = Tuple{Array{T,N},Array{T,N},Array{T,N}}
 
+    include("pde_utils.jl")
     include("yee.jl")
     include("fdtd_utils.jl")
 

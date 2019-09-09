@@ -113,10 +113,48 @@ end
         end
         return out
     end
-Base.getindex(F::EMField{T,3}, i::Int, j::Int, k::Int) where T = permutedims([F.E.x[i,j,k] F.E.y[i,j,k] F.E.z[i,j,k]; F.H.x[i,j,k] F.H.y[i,j,k] F.H.z[i,j,k]])
-Base.getindex(F::EHTuple{T,3}, i::Int, j::Int, k::Int) where T= [F[f][c][i,j,k] for f in 1:2, c in 1:3]
-Base.getindex(F::EHTuple, I::CartesianIndex) = [F[f][c][I] for f in 1:2, c in 1:3]
-Base.getindex(F::EHTuple, I::CartesianIndex, i::Int) = [F[i][c][I] for c in 1:3]
+function deep_times(F::VecArray, k::Number)
+    Fx = F[1].*k
+    Fy = F[2].*k
+    Fz = F[3].*k
+    return (Fx,Fy,Fz)
+end
+
+function Base.getproperty(F::EHTuple{T}, s::Symbol)
+    if symbol == :E
+        return F[1]
+    elseif symbol == :H
+        return F[2]
+    elseif symbol == :D
+        return deep_times(F[1], ε₀)
+    elseif symbol == :W
+        return power_density(F)
+    elseif symbol == :S
+        return pontying(F)
+    elseif
+        throw(ArgumentError("Symbol $s is not a property of F"))
+    end
+end
+
+function Base.getproperty(F::VecArray, s::Symbol)
+    if symbol == :x
+        return F[1]
+    elseif symbol == :y
+        return F[2]
+    elseif symbol == :z
+        return F[3]
+    elseif symbol == :
+
+    else
+        throw(ArgumentError("Symbol $s is not a property of F"))
+    end
+end
+
+Base.getindex(F::EHTuple{T,2}, i::Int, j::Int) where T = (SVector(F.E.x[i,j] F.E.y[i,j] F.E.z[i,j]), SVector(F.H.x[i,j] F.H.y[i,j] F.H.z[i,j]))
+
+Base.getindex(F::EHTuple{T,3}, i::Int, j::Int, k::Int) where T = (SVector(F.E.x[i,j,k] F.E.y[i,j,k] F.E.z[i,j,k]), SVector(F.H.x[i,j,k] F.H.y[i,j,k] F.H.z[i,j,k]))
+Base.getindex(F::EHTuple, I::CartesianIndex) = (SVector(F.E.x[I] F.E.y[I] F.E.z[I]), SVector(F.H.x[I] F.H.y[I] F.H.z[I]))
+Base.getindex(F::EHTuple, I::CartesianIndex, i::Int) = SVector(F.E.x[I] F.E.y[I] F.E.z[I])
 power_density(x::AbstractVector) = sum(x.^2)/2*η₀
 
 Base.CartesianIndices(F::EMField) = CartesianIndices(F.H.x)

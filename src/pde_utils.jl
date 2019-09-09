@@ -1,33 +1,8 @@
-module PDEUtils
-export  δ⁻,δ⁺,δ₂, ∇
-
 using Base.Cartesian
 using LinearAlgebra
 using DiscreteAxis
-#using CuArrays
-for N = 1:5 # An (unused) function generator that is straight witchcraft and makes functions for the laplacian from 1 to 5D
-    @eval begin
-        function laplacian(A::Array{T,$N}) where T<:Number
-            B = similar(A)
-            @nloops $N i A begin
-                tmp = zero(T)
-                # Do the shift by +1.
-                @nexprs $N d1->begin
-                    tmp += (i_d1 < size(A,d1)) ? (@nref $N A d2->(d2==d1) ? i_d2+1 : i_d2) : (@nref $N A i)
-                end
-                # Do the shift by -1.
-                @nexprs $N d1->begin
-                    tmp += (i_d1 > 1) ? (@nref $N A d2->(d2==d1) ? i_d2-1 : i_d2) : (@nref $N A i)
-                end
-                # Subtract the center and store the result
-                (@nref $N B i) = tmp - 2*$N*(@nref $N A i)
-            end
-            B
-        end
-    end
-end
+# This will be removed in favour of DiffEqOperators
 
-#function laplacian(A::AbstractArray{T}, ) where T <: Number
 function δ₂(F::AbstractVector{N}, axis::DAxis) where N <: Number
     δ = similar(F)
     for i in axis.i[2:end-1]
@@ -112,20 +87,7 @@ function δ⁻(x::Int)
     return δ
 end
 
-#=
-function δ(size, step)
-    δ = zeros(size,size)
-    for i in 1:size
-        if i > 1
-            δ[i-1,i] = -1
-        end
-        if i < size
-            δ[i+1,i] = 1
-        end
-    end
-    return sparse(δ)
-end
-=#
+
 function δδ(size::Int, step::Number) # computes the 2nd order differentiator matrix
      δ = zeros(size,size)
      for i in 1:size
@@ -197,4 +159,3 @@ function ⊗(A::CuArray,B::CuArray, direction::Int64)
 end
 =#
 ∇(u, δxx, δyy) = ⊗(δxx,u,1).+⊗(δyy,u,2)
-end
