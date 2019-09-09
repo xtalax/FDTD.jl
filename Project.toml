@@ -1,3 +1,8 @@
+name = "FDTD"
+uuid = "f32c464a-6232-4643-9ba2-b0fbf2656cfc"
+authors = ["Alex Jones"]
+version = "0.1"
+
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
