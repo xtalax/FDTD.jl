@@ -15,7 +15,7 @@ This package uses my other package [DiscreteAxis](https://github.com/xtalax/Disc
 ## Setting up the space
 There is no need to do this manually, the required time step and spatial step for an accurate and stable simulation is a function of the maximum frequency that will need to be simulated, therefore it is reccomended to use the `setup_spacetime` helper function:
 ```
-fmax = 0.5*10^9 #Maximum frequency present in your source
+fmax = 0.5*10^9 #Maximum frequency component present in your source
 
 xmax = ymax = zmax = 0.5
 xmin = ymin = zmin = -0.5
