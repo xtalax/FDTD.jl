@@ -75,7 +75,7 @@ struct EMField{T<:Number,N} <:FieldVector{2, VecField3{T}}
     EMField(F::Tuple{Tuple{Array{T,N},Array{T,N},Array{T,N}},Tuple{Array{T,N},Array{T,N},Array{T,N}}}) where {T,N} = new{T,N}(VecField3(F[1]...), VecField3(F[2]...))
 end
 
-    function split_array(A::AbstractArray{T}) where {T <: AbstractVector}
+    function VecArray(A::AbstractArray{T}) where {T <: AbstractVector}
         out = [zeros(eltype(first(A)), size(A)...) for i in 1:length(first(A))]
         for I in CartesianIndices(A)
             for (target, n) in enumerate(out)
@@ -85,7 +85,7 @@ end
         return Tuple(out)
     end
 
-    function vec_array(A::NTuple{N, T}) where {T <: AbstractArray, N}
+    function LinearAlgebra.Array(A::NTuple{N, T}) where {T <: AbstractArray, N}
         @assert all([size(A[i]) == size(A[1]) for i in 2:N])
         @assert all([eltype(A[i]) == eltype(A[1]) for i in 2:N])
         out = Array{SVector{N, T}, ndims(A[1])}(undef, size(A[1])...)
@@ -116,7 +116,7 @@ end
 
 function Base.getproperty(F::EHTuple, s::Symbol)
     if symbol == :E
-        return F[1]
+        return vectorize(F[1])
     elseif symbol == :H
         return F[2]
     elseif symbol == :D
@@ -124,6 +124,7 @@ function Base.getproperty(F::EHTuple, s::Symbol)
     elseif symbol == :W
         return power_density(F)
     elseif symbol == :S
+        @warn "pontying is currently innaccurate, needs interpolation!"
         return pontying(F)
     else
         throw(ArgumentError("Symbol $s is not a property of F"))
@@ -211,7 +212,21 @@ function Coefficients(s::Space2D, t, m::Medium{T,2}, f₀, d::Int) where T
     σmmax = (M+1)*0.8*η₀/s.x.Δ
     aemax = 2π*f₀*ε₀/10
     ammax = 2π*f₀*μ₀/10
-    for (i, z) in enumerate(PML)
+
+    kmu = zeros(T, d+1)
+    kml = zeros(T, d+1)
+    keu = zeros(T, d+1)
+    kel = zeros(T, d+1)
+    σmu = zeros(T, d+1)
+    σml = zeros(T, d+1)
+    σeu = zeros(T, d+1)
+    σel = zeros(T, d+1)
+    αmu = zeros(T, d+1)
+    αml = zeros(T, d+1)
+    αeu = zeros(T, d+1)
+    αel = zeros(T, d+1)
+
+    for (i, z) in enumerate(layer)
         kmu[i] = 1+(kmax-1)*((z+0.5)/d)^M
         kml[i] = 1+(kmax-1)*(z/d)^M
         keu[i] = 1+(kmax-1)*(z/d)^M
@@ -291,7 +306,18 @@ end
         aemax = 2π*f₀*ε₀/10
         ammax = 2π*f₀*μ₀/10
 
-
+        kmu = zeros(T, d+1)
+        kml = zeros(T, d+1)
+        keu = zeros(T, d+1)
+        kel = zeros(T, d+1)
+        σmu = zeros(T, d+1)
+        σml = zeros(T, d+1)
+        σeu = zeros(T, d+1)
+        σel = zeros(T, d+1)
+        αmu = zeros(T, d+1)
+        αml = zeros(T, d+1)
+        αeu = zeros(T, d+1)
+        αel = zeros(T, d+1)
         for (i, z) in enumerate(PML)
             kmu[i] = 1+(kmax-1)*((z+0.5)/d)^M
             kml[i] = 1+(kmax-1)*(z/d)^M
@@ -301,10 +327,10 @@ end
             σml[i] = σmmax*(z/d)^M
             σeu[i] = σemax*(z/d)^M
             σel[i] = σemax*((z+0.5)/d)^M
-            αmu[i] = ammax*(((d - z+0.5)/d)^Ma)
-            αml[i] = ammax*(((d - z)/d)^Ma)
-            αeu[i] = aemax*(((d - z)/d)^Ma)
-            αel[i] = aemax*(((d - z+0.5)/d)^Ma)
+            αmu[i] = ammax*(((d-z+0.5)/d)^Ma)
+            αml[i] = ammax*(((d-z)/d)^Ma)
+            αeu[i] = aemax*(((d-z)/d)^Ma)
+            αel[i] = aemax*(((d-z+0.5)/d)^Ma)
         end
 
 
