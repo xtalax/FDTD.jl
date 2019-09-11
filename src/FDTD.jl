@@ -13,7 +13,7 @@ module FDTD
     include("cpml.jl")
     include("propagation.jl")
 
-    export FDTD_propagate, radar_propagate, setup_spacetime
+    export FDTD_propagate, radar_propagate, setup_spacetime2D, setup_spacetime3D
     export EMField, VecField3, Medium, Coefficients, PML, pontying, power_density, vec_array
     export PMLAux
     export ε₀, μ₀, η₀, c₀ #Export Constants

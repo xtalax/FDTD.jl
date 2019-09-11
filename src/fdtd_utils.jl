@@ -1,4 +1,4 @@
-function setup_spacetime(fmax::Number, multiplier::Number, npadding::Int = 0; xlims::NTuple{2,T}, ylims::NTuple{2,T}) where T
+function setup_spacetime2D(fmax::Number, multiplier::Number, npadding::Int = 0; xlims::NTuple{2,T}, ylims::NTuple{2,T}) where T
     pts_per_wavelength = 16
     factor = c₀*1.2/Sc
     Δ = c₀ /(pts_per_wavelength*fmax)
@@ -19,7 +19,7 @@ function setup_spacetime(fmax::Number, multiplier::Number, npadding::Int = 0; xl
     return (space, time)
 end
 
-function setup_spacetime(fmax::Number, multiplier::Number, npadding::Int = 0; xlims::NTuple{2,T}, ylims::NTuple{2,T}, zlims::NTuple{2,T}) where T
+function setup_spacetime3D(fmax::Number, multiplier::Number, npadding::Int = 0; xlims::NTuple{2,T}, ylims::NTuple{2,T}, zlims::NTuple{2,T}) where T
     pts_per_wavelength = 16
     factor = c₀*1.2/Sc
     Δ = c₀ /(pts_per_wavelength*fmax)
