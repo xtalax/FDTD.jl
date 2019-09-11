@@ -1,7 +1,6 @@
 module FDTD
-    using LinearAlgebra
-    using Strided
-    using DiscreteAxis
+    using LinearAlgebra, StaticArrays, Strided, Rotations
+    using DiscreteAxis, DiffEqOperators
     using ProgressMeter
     const EHTuple{T,N} = Tuple{Tuple{Array{T,N},Array{T,N},Array{T,N}},Tuple{Array{T,N},Array{T,N},Array{T,N}}}
     const VecArray{T,N} = Tuple{Array{T,N},Array{T,N},Array{T,N}}
@@ -17,5 +16,5 @@ module FDTD
     export FDTD_propagate, radar_propagate, setup_spacetime
     export EMField, VecField3, Medium, Coefficients, PML, pontying, power_density, vec_array
     export PMLAux
-    export ε₀, μ₀, η₀, c₀
+    export ε₀, μ₀, η₀, c₀ #Export Constants
 end

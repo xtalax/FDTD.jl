@@ -65,9 +65,10 @@ function update_H(E::VecArray{T,3}, H::VecArray{T,3}, C::Coefficients{T,3}) wher
 
     Threads.@threads for k in 1:(s[3]-1)
         for j in 1:(s[2]-1), i in 1:(s[1]-1)
-        @inbounds Hx[i,j,k] = C.H[1][i,j,k]*H[1][i,j,k] + C.H[4][i,j,k]*(C.Km[3][k]*(E[2][i, j, k+1] - E[2][i, j, k]) - C.Km[2][j]*(E[3][i, j+1, k] - E[3][i, j, k]))
-        @inbounds Hy[i,j,k] = C.H[2][i,j,k]*H[2][i,j,k] + C.H[5][i,j,k]*(C.Km[1][i]*(E[3][i+1, j, k] - E[3][i, j, k]) - C.Km[3][k]*(E[1][i, j, k+1] - E[1][i, j, k]))
-        @inbounds Hz[i,j,k] = C.H[3][i,j,k]*H[3][i,j,k] + C.H[6][i,j,k]*(C.Km[2][j]*(E[1][i, j+1, k] - E[1][i, j, k]) - C.Km[1][i]*(E[2][i+1, j, k] - E[2][i, j, k]))
+            @inbounds Hx[i,j,k] = C.H[1][i,j,k]*H[1][i,j,k] + C.H[4][i,j,k]*(C.Km[3][k]*(E[2][i, j, k+1] - E[2][i, j, k]) - C.Km[2][j]*(E[3][i, j+1, k] - E[3][i, j, k]))
+            @inbounds Hy[i,j,k] = C.H[2][i,j,k]*H[2][i,j,k] + C.H[5][i,j,k]*(C.Km[1][i]*(E[3][i+1, j, k] - E[3][i, j, k]) - C.Km[3][k]*(E[1][i, j, k+1] - E[1][i, j, k]))
+            @inbounds Hz[i,j,k] = C.H[3][i,j,k]*H[3][i,j,k] + C.H[6][i,j,k]*(C.Km[2][j]*(E[1][i, j+1, k] - E[1][i, j, k]) - C.Km[1][i]*(E[2][i+1, j, k] - E[2][i, j, k]))
+        end
     end
     for h in (Hx,Hy,Hz) #apply dirichlet0 boundary conditions
         for i in 1:3
@@ -88,11 +89,12 @@ function update_E(E::VecArray{T,3}, H::VecArray{T,3}, C::Coefficients{T,3}) wher
     Ex = zeros(T, size(H[1]))
     Ey = zeros(T, size(H[2]))
     Ez = zeros(T, size(H[3]))
-    Threads.@threads for k in 2:s[3],
+    Threads.@threads for k in 2:s[3]
         for j in 2:s[2], i in 2:s[1]
-        @inbounds Ex[i,j,k] = C.E[1][i,j,k]*E[1][i,j,k] + C.E[4][i,j,k]*(C.Ke[2][j]*(H[3][i,j,k] - H[3][i,j-1,k]) - C.Ke[3][k]*(H[2][i, j, k] - H[2][i, j, k-1]))
-        @inbounds Ey[i,j,k] = C.E[2][i,j,k]*E[2][i,j,k] + C.E[5][i,j,k]*(C.Ke[3][k]*(H[1][i,j,k] - H[1][i,j,k-1]) - C.Ke[1][i]*(H[3][i, j, k] - H[3][i-1, j, k]))
-        @inbounds Ez[i,j,k] = C.E[3][i,j,k]*E[3][i,j,k] + C.E[6][i,j,k]*(C.Ke[1][i]*(H[2][i,j,k] - H[2][i-1,j,k]) - C.Ke[2][j]*(H[1][i, j, k] - H[1][i, j-1, k]))
+            @inbounds Ex[i,j,k] = C.E[1][i,j,k]*E[1][i,j,k] + C.E[4][i,j,k]*(C.Ke[2][j]*(H[3][i,j,k] - H[3][i,j-1,k]) - C.Ke[3][k]*(H[2][i, j, k] - H[2][i, j, k-1]))
+            @inbounds Ey[i,j,k] = C.E[2][i,j,k]*E[2][i,j,k] + C.E[5][i,j,k]*(C.Ke[3][k]*(H[1][i,j,k] - H[1][i,j,k-1]) - C.Ke[1][i]*(H[3][i, j, k] - H[3][i-1, j, k]))
+            @inbounds Ez[i,j,k] = C.E[3][i,j,k]*E[3][i,j,k] + C.E[6][i,j,k]*(C.Ke[1][i]*(H[2][i,j,k] - H[2][i-1,j,k]) - C.Ke[2][j]*(H[1][i, j, k] - H[1][i, j-1, k]))
+        end
     end
     for e in (Ex,Ey,Ez) #apply dirichlet0 boundary conditions
         for i in 1:3

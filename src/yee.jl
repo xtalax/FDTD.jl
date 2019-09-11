@@ -1,15 +1,9 @@
-
-using DiscreteAxis
-using StaticArrays#
-using Rotations
-using PDEUtils
-
 abstract type Field{T, N} <: FieldVector{N, Array{T, N}} end
 abstract type CompositeField{T, J, N} <: FieldVector{J, Field{T,N}} end
 
 const ε₀ = 8.85418782*10^-12
 const μ₀ = 4*pi*10^-7
-const c₀ = 1/√(ε₀*μ
+const c₀ = 1/√(ε₀*μ₀)
 const η₀ = √(μ₀/ε₀)
 const Sc = 1/√2
 
@@ -120,7 +114,7 @@ function deep_times(F::VecArray, k::Number)
     return (Fx,Fy,Fz)
 end
 
-function Base.getproperty(F::EHTuple{T}, s::Symbol)
+function Base.getproperty(F::EHTuple, s::Symbol)
     if symbol == :E
         return F[1]
     elseif symbol == :H
@@ -131,7 +125,7 @@ function Base.getproperty(F::EHTuple{T}, s::Symbol)
         return power_density(F)
     elseif symbol == :S
         return pontying(F)
-    elseif
+    else
         throw(ArgumentError("Symbol $s is not a property of F"))
     end
 end
@@ -143,18 +137,16 @@ function Base.getproperty(F::VecArray, s::Symbol)
         return F[2]
     elseif symbol == :z
         return F[3]
-    elseif symbol == :
-
     else
         throw(ArgumentError("Symbol $s is not a property of F"))
     end
 end
 
-Base.getindex(F::EHTuple{T,2}, i::Int, j::Int) where T = (SVector(F.E.x[i,j] F.E.y[i,j] F.E.z[i,j]), SVector(F.H.x[i,j] F.H.y[i,j] F.H.z[i,j]))
+Base.getindex(F::EHTuple{T,2}, i::Int, j::Int) where T = (SVector(F.E.x[i,j], F.E.y[i,j], F.E.z[i,j]), SVector(F.H.x[i,j], F.H.y[i,j], F.H.z[i,j]))
 
-Base.getindex(F::EHTuple{T,3}, i::Int, j::Int, k::Int) where T = (SVector(F.E.x[i,j,k] F.E.y[i,j,k] F.E.z[i,j,k]), SVector(F.H.x[i,j,k] F.H.y[i,j,k] F.H.z[i,j,k]))
-Base.getindex(F::EHTuple, I::CartesianIndex) = (SVector(F.E.x[I] F.E.y[I] F.E.z[I]), SVector(F.H.x[I] F.H.y[I] F.H.z[I]))
-Base.getindex(F::EHTuple, I::CartesianIndex, i::Int) = SVector(F.E.x[I] F.E.y[I] F.E.z[I])
+Base.getindex(F::EHTuple{T,3}, i::Int, j::Int, k::Int) where T = (SVector(F.E.x[i,j,k], F.E.y[i,j,k], F.E.z[i,j,k]), SVector(F.H.x[i,j,k], F.H.y[i,j,k], F.H.z[i,j,k]))
+Base.getindex(F::EHTuple, I::CartesianIndex) = (SVector(F.E.x[I], F.E.y[I], F.E.z[I]), SVector(F.H.x[I], F.H.y[I], F.H.z[I]))
+Base.getindex(F::EHTuple, I::CartesianIndex, i::Int) = SVector(F.E.x[I], F.E.y[I], F.E.z[I])
 power_density(x::AbstractVector) = sum(x.^2)/2*η₀
 
 Base.CartesianIndices(F::EMField) = CartesianIndices(F.H.x)
@@ -180,7 +172,7 @@ struct Medium{T<:Number, N} <: Field{T,4}
     function Medium(s::Space3D{T}; azimuth = 0.0, elevation = 0.0, rotcentre = [0.0,0.0,0.0], ε = με_default, μ = με_default, σ = σ_default, σm = σ_default) where {T<:Number}
         R = RotZXY(azimuth, elevation, 0.0) #generate rotation matrix
         X, Y, Z = (s.x.pts .- rotcentre[1], s.y.pts .- rotcentre[2], s.z.pts .- rotcentre[3])
-        r′ = [SVector{3,T}(R*[x,y,z] for x in X, y in Y, z in Z]
+        r′ = [SVector{3,T}(R*[x,y,z]) for x in X, y in Y, z in Z]
         eps = ε₀.*ε.(r′)
         mu = μ₀.*μ.(r′)
         sig = σ.(r′)

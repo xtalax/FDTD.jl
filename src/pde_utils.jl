@@ -1,8 +1,3 @@
-using Base.Cartesian
-using LinearAlgebra
-using DiscreteAxis
-# This will be removed in favour of DiffEqOperators
-
 function δ₂(F::AbstractVector{N}, axis::DAxis) where N <: Number
     δ = similar(F)
     for i in axis.i[2:end-1]
