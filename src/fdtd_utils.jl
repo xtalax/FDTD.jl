@@ -3,8 +3,8 @@ function setup_spacetime2D(fmax::Number, multiplier::Number, npadding::Int = 0; 
     factor = c₀*1.2/Sc
     Δ = c₀ /(pts_per_wavelength*fmax)
     Δt = Δ/factor
-    x = LinearAxis(xlims[1]-Δ*(npadding+1),xlims[2]+Δ*(npadding+1),Δ) # compensating axis to the new units
-    y = LinearAxis(ylims[1]-Δ*(npadding+1),ylims[2]+Δ*(npadding+1),Δ)
+    x = LinearAxis(xlims[1]-Δ*(npadding),xlims[2]+Δ*(npadding),Δ) # compensating axis to the new units
+    y = LinearAxis(ylims[1]-Δ*(npadding),ylims[2]+Δ*(npadding),Δ)
 
     space = Space2D(x,y)
 
@@ -24,8 +24,9 @@ function setup_spacetime3D(fmax::Number, multiplier::Number, npadding::Int = 0; 
     factor = c₀*1.2/Sc
     Δ = c₀ /(pts_per_wavelength*fmax)
     Δt = Δ/factor
-    x = LinearAxis(xlims[1]-Δ*(npadding+1),xlims[2]+Δ*(npadding+1),Δ) # compensating axis to the new units
-    y = LinearAxis(ylims[1]-Δ*(npadding+1),ylims[2]+Δ*(npadding+1),Δ)
+    x = LinearAxis(xlims[1]-Δ*(npadding),xlims[2]+Δ*(npadding),Δ) # compensating axis to the new units
+    y = LinearAxis(ylims[1]-Δ*(npadding),ylims[2]+Δ*(npadding),Δ)
+    z = LinearAxis(zlims[1]-Δ*(npadding),zlims[2]+Δ*(npadding),Δ)
     space = Space2D(x,y,z)
 
     Nt = round(Int, multiplier*(maximum(domain.(space)))/(c₀*Δt))

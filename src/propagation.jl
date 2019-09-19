@@ -14,7 +14,7 @@ function step_time(F::EHTuple, Φ::PML, C::Coefficients, Esourcenow, Hsourcenow,
     H = applyPML(H, ΦHaux, C, 1, Φ.N)
     E = applyPML(E, ΦEaux, C, 2, Φ.N)
 
-    Φ = PML(ΦEaux,ΦHaux,Φ.N-1)
+    Φ = PML(ΦEaux,ΦHaux,Φ.N)
     E[sourceindex[1]][sourceindex[2]...] = E[sourceindex[1]][sourceindex[2]...] .+ Esourcenow #hard source acts like antenna
     H[sourceindex[1]+ (sourceindex[1]==3 ? -2 : 1)][sourceindex[2]...] = F[2][sourceindex[1]+ (sourceindex[1]==3 ? -2 : 1)][sourceindex[2]...] .+ Hsourcenow
     return ((E, H), Φ)

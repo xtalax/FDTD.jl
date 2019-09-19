@@ -278,10 +278,10 @@ function Coefficients(s::Space2D, t, m::Medium{T,2}, f₀, d::Int) where T
     Ke = Vector[ones(s.x.N),ones(s.y.N)]
     Km = Vector[ones(s.x.N),ones(s.y.N)]
     for i in 1:2
-        Km[i][1:(d+1)] .= 1 ./reverse(kml)
-        Km[i][(end-d):end] .= 1 ./kmu
-        Ke[i][1:d+1] .= 1 ./reverse(kel)
-        Ke[i][(end-d):end] .= 1 ./keu
+        Km[i][1:(d)] .= 1 ./reverse(kml)
+        Km[i][(end-d+1):end] .= 1 ./kmu
+        Ke[i][1:d] .= 1 ./reverse(kel)
+        Ke[i][(end-d+1):end] .= 1 ./keu
     end
     rbel = reverse(bel)
     rcel = reverse(cel)
@@ -369,10 +369,10 @@ end
         Ke = Vector[ones(s.x.N),ones(s.y.N),ones(s.z.N)]
         Km = Vector[ones(s.x.N),ones(s.y.N),ones(s.z.N)]
         for i in 1:3
-            Km[i][1:(d+1)] .= 1 ./reverse(kml)
-            Km[i][(end-d):end] .= 1 ./kmu
-            Ke[i][1:d+1] .= 1 ./reverse(kel)
-            Ke[i][(end-d):end] .= 1 ./keu
+            Km[i][1:(d)] .= 1 ./reverse(kml)
+            Km[i][(end-d+1):end] .= 1 ./kmu
+            Ke[i][1:d] .= 1 ./reverse(kel)
+            Ke[i][(end-d+1):end] .= 1 ./keu
         end
         rbel = reverse(bel)
         rcel = reverse(cel)

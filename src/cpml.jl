@@ -1,5 +1,5 @@
 ################################################################################
-# PML update in 2D - see Coefficients in yee.jl if you are confused 
+# PML update in 2D - see Coefficients in yee.jl if you are confused
 ################################################################################
 ###
 # pml[z][x] is the effect on x field from pml at z boundary!
@@ -11,27 +11,26 @@ function updatePML(Φ::PMLAux{T}, F::VecArray{T, 2}, C::Coefficients, comp::Int,
     maxxx =  zeros(T, N, C.s.y.N); maxyy = zeros(T, C.s.x.N, N);
     minxx =  zeros(T, N, C.s.y.N); minyy = zeros(T, C.s.x.N, N);
 
-
     x,y,z = (1,2,3)
     maxyx = cover2d(C.bu[comp], y).*Φ.max[y][x]
-                    .+ cover2d(C.cu[comp], y) .*selectdim(( ⊗(C.δ[comp], selectdim(F[z], y, (size(F[z])[y]-N):size(F[z])[y]), y)), y, 2:N+1)
+                    .+ cover2d(C.cu[comp], y) .*selectdim(⊗(C.δ[comp], selectdim(F[z], y, size(F[z],y)-N:size(F[z],y)), y), y, 2:N+1)
     minyx = cover2d(C.bl[comp], y).*Φ.min[y][x]
-                    .+ cover2d(C.cl[comp], y) .*selectdim(( ⊗(C.δ[comp], selectdim(F[z], y, 1:N+1), y)), y, 1:N)
+                    .+ cover2d(C.cl[comp], y) .*selectdim(⊗(C.δ[comp], selectdim(F[z], y, 1:N+1), y), y, 1:N)
 
     x,y,z = (2,3,1)
 
     maxxy = cover2d(C.bu[comp], z).*Φ.max[z][x]
-                    .+ cover2d(C.cu[comp], z) .*selectdim(( ⊗(C.δ[comp], selectdim(F[y], z, (size(F[y])[z]-N):size(F[y])[z]), z)), z, 2:N+1)
+                    .+ cover2d(C.cu[comp], z) .*selectdim(( ⊗(C.δ[comp], selectdim(F[y], z, (size(F[y],z)-N):size(F[y],z)), z)), z, 2:N+1)
     minxy = cover2d(C.bl[comp], z).*Φ.min[z][x]
                     .+ cover2d(C.cl[comp], z) .*selectdim(( ⊗(C.δ[comp], selectdim(F[y], z, 1:N+1), z)), z, 1:N)
     x,y,z = (3,1,2)
     maxxz = cover2d(C.bu[comp], y).*Φ.max[y][x]
-                    .+ cover2d(C.cu[comp], y) .*selectdim(( ⊗(C.δ[comp], selectdim(F[z], y, (size(F[z])[y]-N):size(F[z])[y]), y)), y, 2:N+1)
+                    .+ cover2d(C.cu[comp], y) .*selectdim(( ⊗(C.δ[comp], selectdim(F[z], y, (size(F[z],y)-N):size(F[z],y)), y)), y, 2:N+1)
     minxz = cover2d(C.bl[comp], y).*Φ.min[y][x]
                     .+ cover2d(C.cl[comp], y) .*selectdim(( ⊗(C.δ[comp], selectdim(F[z], y, 1:N+1), y)), y, 1:N)
 
     maxyz = cover2d(C.bu[comp], z).*Φ.max[z][x]
-                    .+ cover2d(C.cu[comp], z) .*selectdim(( ⊗(C.δ[comp], selectdim(F[y], z, (size(F[y])[z]-N):size(F[y])[z]), z)), z, 2:N+1)
+                    .+ cover2d(C.cu[comp], z) .*selectdim(( ⊗(C.δ[comp], selectdim(F[y], z, (size(F[y],z)-N):size(F[y],z)), z)), z, 2:N+1)
     minyz = cover2d(C.bl[comp], z).*Φ.min[z][x]
                     .+ cover2d(C.cl[comp], z) .*selectdim(( ⊗(C.δ[comp], selectdim(F[y], z, 1:N+1), z)), z, 1:N)
 
