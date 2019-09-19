@@ -1,5 +1,5 @@
 module FDTD
-    using LinearAlgebra, StaticArrays, Strided, Rotations
+    using LinearAlgebra, StaticArrays, Strided, Rotations, SparseArrays
     using DiscreteAxis, DiffEqOperators, GeometryTypes
     using ProgressMeter
     const EHTuple{T,N} = Tuple{Tuple{Array{T,N},Array{T,N},Array{T,N}},Tuple{Array{T,N},Array{T,N},Array{T,N}}}

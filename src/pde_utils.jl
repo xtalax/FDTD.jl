@@ -99,8 +99,26 @@ function δδ(size::Int, step::Number) # computes the 2nd order differentiator m
      return δ./step^2
   end
 
+  @noinline function _slice_rmul!(out::AbstractArray,A::AbstractArray{B,M}, u::AbstractArray{T,N}, dim::Int, pre, post) where {T,B,N,M}
+      for J in post
+          for I in pre
+              out[I,:,J] = A*u[I, :, J]
+          end
+      end
+      return out
+  end
+
+  function ⊗(A::AbstractArray{B,2}, u::AbstractArray{T,N}, dim::Int) where {T, B, N,M}
+      @assert N != 1
+      @assert size(A,2) == size(u,dim) "The second dim of `A` must match the sliced dim of `u`, got $(size(A,2)) $(size(u,dim))"
+      out = similar(u)
+      _slice_rmul!(out, A, u, dim, CartesianIndices(axes(u)[1:dim-1]), CartesianIndices(axes(u)[(dim+1):end]))
+      return out
+  end
+
+
 # this function splits the matrix B in to vectors along the specified direction, and then multiplies each vector by the matrix A
- function ⊗(A::AbstractMatrix,B::AbstractArray{N,2}, direction::Int) where N<:Number
+ #=function ⊗(A::AbstractMatrix,B::AbstractArray{N,2}, direction::Int) where N<:Number
      s = size(B)
 
     if direction == 1
@@ -177,5 +195,6 @@ function ⊗(A::CuArray,B::CuArray, direction::Int64)
    end
    return C
 end
+=#
 =#
 ∇(u, δxx, δyy) = ⊗(δxx,u,1).+⊗(δyy,u,2)

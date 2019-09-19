@@ -61,8 +61,8 @@ struct PML{T<:Number,M}
     H::PMLAux{T,M}
     N::Int64
     function PML(s::Space2D{T}, nLayer) where {T<:Number}
-        E, H = (PMLAux(s, nLayer+1), PMLAux(s,nLayer+1))
-        new{T,2}(E,H, nLayer+1)
+        E, H = (PMLAux(s, nLayer), PMLAux(s,nLayer))
+        new{T,2}(E,H, nLayer)
     end
     PML(E::PMLAux{T,M}, H::PMLAux{T,M},N::Int64) where {T,M} = new{T,M}(E,H,N)
 end
@@ -199,10 +199,10 @@ end
     # This function assumes that Δx Δy and Δz are the same - Not too keen on the idea of implementing a non uniform grid right now
 
 function Coefficients(s::Space2D, t, m::Medium{T,2}, f₀, d::Int) where T
-    δtmp = (δ⁺(d+2), δ⁻(d+2))
+    δtmp = (δ⁺(d+1), δ⁻(d+1))
     δ = map(D -> D./s.x.Δ, δtmp)
     # Calculate Coefficients for the layer
-    layer = (0:d)
+    layer = (0:d-1)
 
     kmax = 15
     M = 4
@@ -213,18 +213,18 @@ function Coefficients(s::Space2D, t, m::Medium{T,2}, f₀, d::Int) where T
     aemax = 2π*f₀*ε₀/10
     ammax = 2π*f₀*μ₀/10
 
-    kmu = zeros(T, d+1)
-    kml = zeros(T, d+1)
-    keu = zeros(T, d+1)
-    kel = zeros(T, d+1)
-    σmu = zeros(T, d+1)
-    σml = zeros(T, d+1)
-    σeu = zeros(T, d+1)
-    σel = zeros(T, d+1)
-    αmu = zeros(T, d+1)
-    αml = zeros(T, d+1)
-    αeu = zeros(T, d+1)
-    αel = zeros(T, d+1)
+    kmu = zeros(T, d)
+    kml = zeros(T, d)
+    keu = zeros(T, d)
+    kel = zeros(T, d)
+    σmu = zeros(T, d)
+    σml = zeros(T, d)
+    σeu = zeros(T, d)
+    σel = zeros(T, d)
+    αmu = zeros(T, d)
+    αml = zeros(T, d)
+    αeu = zeros(T, d)
+    αel = zeros(T, d)
 
     for (i, z) in enumerate(layer)
         kmu[i] = 1+(kmax-1)*((z+0.5)/d)^M
@@ -291,10 +291,10 @@ function Coefficients(s::Space2D, t, m::Medium{T,2}, f₀, d::Int) where T
 end
 
     function Coefficients(s, t, m::Medium{T,3}, f₀, d::Int) where {T}
-        δtmp =(δ⁺(d+2), δ⁻(d+2))
+        δtmp =(δ⁺(d+1), δ⁻(d+1))
         δ = map(D -> D./s.x.Δ, δtmp)
         # Calculate Coefficients for the PML
-        PML = (0:d)
+        PML = (0:d-1)
         kmax = 15
         M = 4
         Ma = 1
@@ -304,18 +304,18 @@ end
         aemax = 2π*f₀*ε₀/10
         ammax = 2π*f₀*μ₀/10
 
-        kmu = zeros(T, d+1)
-        kml = zeros(T, d+1)
-        keu = zeros(T, d+1)
-        kel = zeros(T, d+1)
-        σmu = zeros(T, d+1)
-        σml = zeros(T, d+1)
-        σeu = zeros(T, d+1)
-        σel = zeros(T, d+1)
-        αmu = zeros(T, d+1)
-        αml = zeros(T, d+1)
-        αeu = zeros(T, d+1)
-        αel = zeros(T, d+1)
+        kmu = zeros(T, d)
+        kml = zeros(T, d)
+        keu = zeros(T, d)
+        kel = zeros(T, d)
+        σmu = zeros(T, d)
+        σml = zeros(T, d)
+        σeu = zeros(T, d)
+        σel = zeros(T, d)
+        αmu = zeros(T, d)
+        αml = zeros(T, d)
+        αeu = zeros(T, d)
+        αel = zeros(T, d)
         for (i, z) in enumerate(PML)
             kmu[i] = 1+(kmax-1)*((z+0.5)/d)^M
             kml[i] = 1+(kmax-1)*(z/d)^M

@@ -4,7 +4,12 @@ authors = ["jones "]
 version = "0.1.0"
 
 [deps]
+DiffEqOperators = "9fdde737-9c7f-55bf-ade8-46b3f136cc48"
+GeometryTypes = "4d00f742-c7ba-57c2-abde-4428a4b178cb"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+Rotations = "6038ab10-8711-5258-84ad-4b1120ba62dc"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Strided = "5e0ebb24-38b0-5f93-81fe-25c709ecae67"

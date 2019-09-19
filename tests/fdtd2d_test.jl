@@ -32,7 +32,7 @@ function dipole_test2D(θ=0.0)
     Hsource = zeros(time.N)
 
     sourceloc = [x.N ÷ 2 for x in space]
-    sourceindex = (2, sourceloc)
+    sourceindex = (3, sourceloc)
     detectorindex = (:,[:,:])
 
     @time field = FDTD_propagate(space, time, f₀, nPML; #Try with a PML
@@ -67,8 +67,8 @@ function Medium_Test2D(θ=0.0)
     Hsource = zeros(time.N)
     interior = interior_range(space, nPML)
     sourceloc = [nPML+2, interior[2]]
-    sourceindex = (2, sourceloc)
-    detectorindex = (:,[:,:,:])
+    sourceindex = (3, sourceloc)
+    detectorindex = (:,[:,:])
 
     @time field = FDTD_propagate(space, time, f₀, nPML; #Try with a PML
                                     source = (Esource, Hsource),

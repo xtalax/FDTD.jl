@@ -1,32 +1,8 @@
 """
-Step time for a TEM grid (2D)
+Step time for both 2D and 3D
 """
-function step_time(F::EHTuple{T,2}, Φ::PML, C::Coefficients, TEsource, TMsource, sourceindex) where T # F is the EM field, C is a wrapper for the Coefficients used here
-    E, H = F
 
-    H = update_H(E, H, C)
-    E = update_E(E, H, C)
-
-    ΦEaux = updatePML(Φ.E, H, C, 1, Φ.N)
-    ΦHaux = updatePML(Φ.H, E, C, 2, Φ.N)
-
-
-    H = applyPML(H, ΦHaux, C, 1, Φ.N)
-    E = applyPML(E, ΦEaux, C, 2, Φ.N)
-
-    Φ = PML(ΦEaux,ΦHaux,Φ.N)
-
-    E[3][sourceindex...] = E[3][sourceindex...] .+ TEsource #hard source acts like antenna
-
-    H[3][sourceindex...] = H[3][sourceindex...] .+ TMsource #hard source acts like antenna
-
-    return ((E, H), Φ)
-end
-
-"""
-Step time for a full 3D grid
-"""
-function step_time(F::EHTuple{T}, Φ::PML, C::Coefficients, Esourcenow, Hsourcenow, sourceindex) where T # F is the EM field, C is a wrapper for the Coefficients used here
+function step_time(F::EHTuple, Φ::PML, C::Coefficients, Esourcenow, Hsourcenow, sourceindex) where T # F is the EM field, C is a wrapper for the Coefficients used here
     E, H = F
 
     H = update_H(E, H, C)
@@ -38,20 +14,19 @@ function step_time(F::EHTuple{T}, Φ::PML, C::Coefficients, Esourcenow, Hsourcen
     H = applyPML(H, ΦHaux, C, 1, Φ.N)
     E = applyPML(E, ΦEaux, C, 2, Φ.N)
 
-    Φ = PML(ΦEaux,ΦHaux,Φ.N)
+    Φ = PML(ΦEaux,ΦHaux,Φ.N-1)
     E[sourceindex[1]][sourceindex[2]...] = E[sourceindex[1]][sourceindex[2]...] .+ Esourcenow #hard source acts like antenna
-    Hnew[sourceindex[1]+ (sourceindex[1]==3 ? -2 : 1)][sourceindex[2]...] = F[2][sourceindex[1]+ (sourceindex[1]==3 ? -2 : 1)][sourceindex[2]...] + Hsourcenow
+    H[sourceindex[1]+ (sourceindex[1]==3 ? -2 : 1)][sourceindex[2]...] = F[2][sourceindex[1]+ (sourceindex[1]==3 ? -2 : 1)][sourceindex[2]...] .+ Hsourcenow
     return ((E, H), Φ)
 end
 
-
-function FDTD_propagate(space::ProductAxis, time::LinearAxis, f₀::T, nPML::Int = 0;
+function FDTD_propagate(space::ProductAxis{T,N}, time::LinearAxis, f₀::T, nPML::Int = 0;
                         source,
                         medium::Medium,
                         sourceindex = origin(space),
-                        detectorindex =  (:, [:, :, :]),
+                        detectorindex =  (:, colons(N)),
                         reduction = identity
-                        ) where T
+                        ) where {T,N}
 
 
       Ex = zeros(T, size(space)...)
@@ -63,7 +38,7 @@ function FDTD_propagate(space::ProductAxis, time::LinearAxis, f₀::T, nPML::Int
       Hz = zeros(T, size(space)...)
 
       F = (E,H) = ((Ex,Ey,Ez), (Hx,Hy,Hz))
-
+   Esource, Hsource = source
    Φ = PML(space, nPML)
    C = Coefficients(space, time, medium, f₀, nPML)
 
@@ -79,7 +54,7 @@ function FDTD_propagate(space::ProductAxis, time::LinearAxis, f₀::T, nPML::Int
         EM_out = false
     end
     @showprogress "Simulating with FDTD..." for i in time.i
-        Fnew, Φnew = step_time(F, Φ, C, source[i], source[i], sourceindex)
+        Fnew, Φnew = step_time(F, Φ, C, Esource[i], Hsource[i], sourceindex)
         if EM_out
              out[i] =EMField(Fnew)
         else
