@@ -39,30 +39,6 @@ function setup_spacetime3D(fmax::Number, multiplier::Number, npadding::Int = 0; 
     return (space, time)
 end
 
-    function ⊗(δ::Matrix, F::AbstractArray, dim::Int)
-        s = size(F)
-        out = similar(F)
-        if dim == 1
-            for j in 1:s[3]
-                for i in 1:s[2]
-                    @views out[:,i,j] = δ*F[:,i,j]
-                end
-            end
-        elseif dim == 2
-            for j in 1:s[3]
-                for i in 1:s[1]
-                    @views out[i,:,j] = δ*F[i,:,j]
-                end
-            end
-        elseif dim == 3
-            for j in 1:s[2]
-                for i in 1:s[1]
-                    @views out[i,j,:] = δ*F[i,j,:]
-                end
-            end
-        end
-        return out
-    end
 
 curl(F, δ, dims) = ⊗(δ[dims[2]], F[dims[1]], dims[2]) .-
                         ⊗(δ[dims[1]], F[dims[2]],dims[1])

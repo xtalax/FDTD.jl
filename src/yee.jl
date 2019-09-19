@@ -295,8 +295,6 @@ end
         δ = map(D -> D./s.x.Δ, δtmp)
         # Calculate Coefficients for the PML
         PML = (0:d)
-
-
         kmax = 15
         M = 4
         Ma = 1

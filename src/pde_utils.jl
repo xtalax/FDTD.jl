@@ -1,5 +1,5 @@
 function δ₂(F::AbstractVector{N}, axis::DAxis) where N <: Number
-    δ = similar(F)
+    δ = spsimilar(F)
     for i in axis.i[2:end-1]
         δ[i] = 2*F[i]-F[i-1]-F[i-2]/axis
     end
@@ -7,7 +7,7 @@ function δ₂(F::AbstractVector{N}, axis::DAxis) where N <: Number
 end
 
 function δ⁻(size::Int, step::Number) # reverse difference matrix generator
-    δ = zeros(size,size)
+    δ = spzeros(size,size)
     for i in 1:size
         δ[i,i] = 1
         if i > 1
@@ -37,7 +37,7 @@ end
 
 
 function δ⁺(x::LinearAxis)
-    δ = zeros(x.N,x.N)
+    δ = spzeros(x.N,x.N)
     for i in 1:x.N
         δ[i,i] = -1
         if i < x.N
@@ -48,7 +48,7 @@ function δ⁺(x::LinearAxis)
 end
 
 function δ⁺(x::Int)
-    δ = zeros(x,x)
+    δ = spzeros(x,x)
     for i in 1:x
         δ[i,i] = -1
         if i < x
@@ -60,7 +60,7 @@ end
 
 
 function δ⁻(x::LinearAxis)
-    δ = zeros(x.N,x.N)
+    δ = spzeros(x.N,x.N)
     for i in 1:x.N
         δ[i,i] = 1
         if i > 1
@@ -72,7 +72,7 @@ end
 
 
 function δ⁻(x::Int)
-    δ = zeros(x,x)
+    δ = spzeros(x,x)
     for i in 1:x
         δ[i,i] = 1
         if i > 1
@@ -84,7 +84,7 @@ end
 
 
 function δδ(size::Int, step::Number) # computes the 2nd order differentiator matrix
-     δ = zeros(size,size)
+     δ = spzeros(size,size)
      for i in 1:size
          δ[i,i] = -2.0
 
@@ -100,7 +100,7 @@ function δδ(size::Int, step::Number) # computes the 2nd order differentiator m
   end
 
 # this function splits the matrix B in to vectors along the specified direction, and then multiplies each vector by the matrix A
- function ⊗(A::AbstractArray,B::AbstractArray{N,2}, direction::Int) where N<:Number
+ function ⊗(A::AbstractMatrix,B::AbstractArray{N,2}, direction::Int) where N<:Number
      s = size(B)
 
     if direction == 1
@@ -120,6 +120,31 @@ function δδ(size::Int, step::Number) # computes the 2nd order differentiator m
     end
     return C
 end
+function ⊗(δ::AbstractMatrix, F::AbstractArray{T,3}, dim::Int) where T
+    s = size(F)
+    out = similar(F)
+    if dim == 1
+        for j in 1:s[3]
+            for i in 1:s[2]
+                @views out[:,i,j] = δ*F[:,i,j]
+            end
+        end
+    elseif dim == 2
+        for j in 1:s[3]
+            for i in 1:s[1]
+                @views out[i,:,j] = δ*F[i,:,j]
+            end
+        end
+    elseif dim == 3
+        for j in 1:s[2]
+            for i in 1:s[1]
+                @views out[i,j,:] = δ*F[i,j,:]
+            end
+        end
+    end
+    return out
+end
+
 # this is a test that does exactly the same thing as the function above
  function SliceProduct(A::Array{N,2},B::Array{N,2}, direction::Int) where N<:Number
      s = size(B)
