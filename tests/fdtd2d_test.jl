@@ -78,10 +78,7 @@ function Medium_Test2D(θ=0.0)
                                     )
     #s_size = size(space)
 
-
-    E = getproperty.(field, :E)
-    H = getproperty.(field, :H)
-
+    return field
 end
 field = Medium_Test2D(0.1)
 

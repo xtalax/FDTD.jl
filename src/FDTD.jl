@@ -3,6 +3,8 @@ module FDTD
     using DiscreteAxis, DiffEqOperators, GeometryTypes
     using ProgressMeter
     const EHTuple{T,N} = Tuple{Tuple{Array{T,N},Array{T,N},Array{T,N}},Tuple{Array{T,N},Array{T,N},Array{T,N}}}
+    const EHElement{T} = Tuple{Tuple{T,T,T},Tuple{T,T,T}}
+
     const VecArray{T,N} = Tuple{Array{T,N},Array{T,N},Array{T,N}}
 
     include("pde_utils.jl")

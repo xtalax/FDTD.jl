@@ -114,6 +114,7 @@ function deep_times(F::VecArray, k::Number)
     return (Fx,Fy,Fz)
 end
 
+
 function Base.getproperty(F::EHTuple, s::Symbol)
     if symbol == :E
         return vectorize(F[1])
@@ -143,11 +144,98 @@ function Base.getproperty(F::VecArray, s::Symbol)
     end
 end
 
-Base.getindex(F::EHTuple{T,2}, i::Int, j::Int) where T = (SVector(F.E.x[i,j], F.E.y[i,j], F.E.z[i,j]), SVector(F.H.x[i,j], F.H.y[i,j], F.H.z[i,j]))
+for op in (:getindex, :view, :selectdim)
+    @eval Base.$op(F::EHTuple{T,N}, inds...) where {T,N}= ($op(F[1], inds...), $op(F[2], inds...))
+    @eval Base.$op(F::EHTuple{T,N}, inds::CartesianIndex) where {T,N}= ($op(F[1], I), $op(F[2], I))
 
-Base.getindex(F::EHTuple{T,3}, i::Int, j::Int, k::Int) where T = (SVector(F.E.x[i,j,k], F.E.y[i,j,k], F.E.z[i,j,k]), SVector(F.H.x[i,j,k], F.H.y[i,j,k], F.H.z[i,j,k]))
-Base.getindex(F::EHTuple, I::CartesianIndex) = (SVector(F.E.x[I], F.E.y[I], F.E.z[I]), SVector(F.H.x[I], F.H.y[I], F.H.z[I]))
-Base.getindex(F::EHTuple, I::CartesianIndex, i::Int) = SVector(F.E.x[I], F.E.y[I], F.E.z[I])
+    @eval Base.$op(F::VecArray{T,N}, inds...) where {T,N}= ($op(F[1], inds...), $op(F[2], inds...), $op(F[3], inds...))
+    @eval Base.$op(F::VecArray{T,N}, inds::CartesianIndex) where {T,N}= ($op(F[1], I), $op(F[2], I), $op(F[3], I))
+end
+for op in (:*, :/, :\, :+, :-)
+    for EHType in (:EHTuple, :EHElement)
+        @eval begin
+            function Base.$op(F::$EHType, x::Number)
+                f(F) = $op(F, x)
+                return broadcast(f, F)
+            end
+            function Base.$op(x::Number, F::$EHType)
+                f(F) = $op(F, x)
+                return broadcast(f, F)
+            end
+        end
+    end
+    @eval begin
+        function Base.$op(F::EHTuple{T}, E::EHElement) where T
+            for i in (1,2), j in (1,2,3)
+                F[i][j] = $op.(F[i][j], E[i][j])
+            end
+            return F
+        end
+        function Base.$op(E::EHElement, F::EHTuple{T}) where T
+            for i in (1,2), j in (1,2,3)
+                F[i][j] = $op.(E[i][j], F[i][j])
+            end
+            return F
+        end
+    end
+end
+
+
+function Base.setindex!(F::EHTuple{T,N}, x::EHElement{T}, inds...) where T
+    for i in (1,2), j in (1,2,3)
+        F[i][j][inds...] = x[i][j][inds...]
+    end
+end
+
+Base.broadcast(f::Function, F::Union{EHTuple, EHElement}) = (broadcast(f, F[1]), broadcast(f, F[2]))
+Base.broadcast(f::Function, F::VecArray) = (f.(F[1]), f.(F[2]), f.(F[3]))
+
+eltype(::EHTuple{T,N}) where {T,N} = T
+ndims(::EHTuple{T,N}) where {T,N} = N
+
+"""
+Used To find the offset for this component in space
+"""
+@pure function getoffset(::EHTuple{T,3}, field::Int, component::Int)
+    @assert 1 ≤ component ≤ 3
+    out = zeros(3)
+    if field == 1
+        out[component] = 0.5
+    elseif field == 2
+        out[setdiff(1:3, component)] = 0.5
+
+    else
+        throw("Unsupported field used, got $field")
+    end
+    return SVector{3,eltype(out)}(out)
+end
+
+
+@pure function getoffset(::EHTuple{T,2}, field::Int, component::Int)
+    @assert 1 ≤ component ≤ 3
+    out = zeros(2)
+    if component == 3
+        return SVector{2,eltype(out)}(out)
+    end
+    if field == 1
+        out[component] = 0.5
+    elseif field == 2
+        out[setdiff(1:2, component)] = 0.5
+    else
+        throw("Unsupported field used, got $field")
+    end
+    return SVector{2,eltype(out)}(out)
+end
+
+#Base.getindex(F::EHTuple{T,2}, i::Int, j::Int) where T = (SVector(F.E.x[i,j], F.E.y[i,j], F.E.z[i,j]), SVector(F.H.x[i,j], F.H.y[i,j], F.H.z[i,j]))
+#Base.getindex(F::EHTuple{T,3}, i::Int, j::Int, k::Int) where T = (SVector(F.E.x[i,j,k], F.E.y[i,j,k], F.E.z[i,j,k]), SVector(F.H.x[i,j,k], F.H.y[i,j,k], F.H.z[i,j,k]))
+#Base.getindex(F::EHTuple, I::CartesianIndex) = (SVector(F.E.x[I], F.E.y[I], F.E.z[I]), SVector(F.H.x[I], F.H.y[I], F.H.z[I]))
+#Base.getindex(F::EHTuple, I::CartesianIndex, i::Int) = SVector(F.E.x[I], F.E.y[I], F.E.z[I])
+Base.size(F::EHTuple) = size(F[1][1])
+Base.length(F::EHTuple) = prod(size(F))
+EHTuple{T}(s::NTuple{N, I}) where {T, N, I<:Int} = ((zeros(T, s), zeros(T, s), zeros(T, s)), (zeros(T, s), zeros(T, s), zeros(T, s)))
+
+EHElement(val) = ((val,val,val),(val,val,val))
 power_density(x::AbstractVector) = sum(x.^2)/2*η₀
 
 Base.CartesianIndices(F::EMField) = CartesianIndices(F.H.x)
