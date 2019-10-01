@@ -183,7 +183,7 @@ end
 
 function Base.setindex!(F::EHTuple{T,N}, x::EHElement{T}, inds...) where T
     for i in (1,2), j in (1,2,3)
-        F[i][j][inds...] = x[i][j][inds...]
+        F[i][j][inds...] = x[i][j]
     end
 end
 

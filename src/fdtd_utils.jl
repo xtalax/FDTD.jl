@@ -58,6 +58,19 @@ curl(F, δ, dims) = ⊗(δ[dims[2]], F[dims[1]], dims[2]) .-
     return permutedims(repeat(A, 1, 1, 1), perm)
 end
 
+@inline function covernd(A::AbstractVector, dims::Integer, dim::Integer)
+    @assert 1 <= dim <= dims
+    if dims == 1
+        return A
+    if dims == 2
+        return cover2d(A, dim)
+    if dims == 3
+        return cover3d(A, dim)
+    else
+        throw("this dimension is not supported! use dims less than 4 got $dim")
+    end
+end
+
 @inline function cover2d(A::AbstractVector, dim::Integer)
     extension = ones(Int64, 2)
     if dim == 1
