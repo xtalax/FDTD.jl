@@ -468,3 +468,92 @@ end
         rcml = reverse(cml)
         Coefficients{T}(E, H,s,t, δ, (beu,bmu), (rbel,rbml), (ceu,cmu), (rcel,  rcml), Tuple(Km), Tuple(Ke))
     end
+
+
+
+    function Coefficients(x::LinearAxis, t, m::Medium{T,1}, f₀, d::Int) where T
+        δtmp = (δ⁺(d+1), δ⁻(d+1))
+        δ = map(D -> D./x.Δ, δtmp)
+        # Calculate Coefficients for the layer
+        layer = (0:d-1)
+
+        kmax = 15
+        M = 4
+        Ma = 1
+        #https://www.degruyter.com/downloadpdf/j/jee.2017.68.issue-1/jee-2017-0006/jee-2017-0006.pdf !!!!!!
+        σemax = (M+1)*0.8/(η₀*x.Δ)
+        σmmax = (M+1)*0.8*η₀/x.Δ
+        aemax = 2π*f₀*ε₀/10
+        ammax = 2π*f₀*μ₀/10
+
+        kmu = zeros(T, d)
+        kml = zeros(T, d)
+        keu = zeros(T, d)
+        kel = zeros(T, d)
+        σmu = zeros(T, d)
+        σml = zeros(T, d)
+        σeu = zeros(T, d)
+        σel = zeros(T, d)
+        αmu = zeros(T, d)
+        αml = zeros(T, d)
+        αeu = zeros(T, d)
+        αel = zeros(T, d)
+
+        for (i, z) in enumerate(layer)
+            kmu[i] = 1+(kmax-1)*((z+0.5)/d)^M
+            kml[i] = 1+(kmax-1)*(z/d)^M
+            keu[i] = 1+(kmax-1)*(z/d)^M
+            kel[i] = 1+(kmax-1)*((z+0.5)/d)^M
+            σmu[i] = σmmax*((z+0.5)/d)^M
+            σml[i] = σmmax*(z/d)^M
+            σeu[i] = σemax*(z/d)^M
+            σel[i] = σemax*((z+0.5)/d)^M
+            αmu[i] = ammax*(((d - z+0.5)/d)^Ma)
+            αml[i] = ammax*(((d - z)/d)^Ma)
+            αeu[i] = aemax*(((d - z)/d)^Ma)
+            αel[i] = aemax*(((d - z+0.5)/d)^Ma)
+        end
+
+        # Calculate auxillary Coefficients for the layer
+        beu = exp.(-(σeu./keu .+ αeu).*t.Δ/ε₀)
+        ceu = (beu.-1.0).*σeu ./ (σeu.*keu + keu.^2 .*αeu)
+        bel = exp.(-(σel./kel .+ αel).*t.Δ/ε₀)
+        cel = (bel.-1.0).*σel ./ (σel.*kel + kel.^2 .*αel)
+
+
+        bmu = exp.(-(σmu./kmu .+ αmu).*t.Δ/μ₀)
+        cmu = (bmu.-1.0).*σmu ./ (σmu.*kmu + kmu.^2 .*αmu)
+        bml = exp.(-(σml./kml .+ αml).*t.Δ/μ₀)
+
+
+        cml = (bml.-1.0).*σml ./ (σml.*kml + kml.^2 .*αml)
+
+
+        tmp = 1.0 .+ m.σm.*t.Δ ./(2.0.*m.μ)
+        #Δt ⪕ √(μ₀ε₀)
+        Chxh = (2.0 .- tmp)./tmp #source chapter 9 page 8 https://www.eecs.wsu.edu/~schneidj/ufdtd/, with modifications to support inhomogeneous media
+        Chyh = Chzh = Chxh # Start here if you want to implement anisotropy
+
+        Chxe = t.Δ ./ (tmp .*m.μ .* x.Δ )
+        Chye = Chze = Chxe
+
+        tmp = 1.0 .+ m.σ ./(2.0.*m.ε)
+        Cexe = (2.0.-tmp)./tmp
+        Ceye = Ceze = Cexe # these are equal in the anisotropic uniform grid case, this kind of assignment also only allocates 1 matrix of memory, meaning the constants are passed as pointers to the same place in memory
+
+        Cexh = t.Δ ./ (tmp .* m.ε.*x.Δ)
+        Ceyh = Cezh = Cexh
+
+        # put all the coeffs in to a nice neat wrapper
+        H = (Chxh, Chyh, Chzh, Chxe, Chye, Chze)
+        E = (Cexe, Ceye, Ceze, Cexh, Ceyh, Cezh)
+
+        Ke = Vector[ones(1)] # dummy vector to keep the type happy
+        Km = Vector[ones(1)]
+
+        rbel = reverse(bel)
+        rcel = reverse(cel)
+        rbml = reverse(bml)
+        rcml = reverse(cml)
+        Coefficients{T,1}(E, H,s,t, δ, (beu,bmu), (rbel,rbml), (ceu,cmu), (rcel,  rcml), Tuple(Km), Tuple(Ke))
+    end

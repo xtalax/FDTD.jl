@@ -33,9 +33,19 @@ function compact_range_transform(F::EHTuple{T1,N}, space::ProductAxis, detector_
     return covernd([Ezout[3], Hzout[3]] N, d)
 end
 
-function equivalent_current_compact_range_nf2ff_negative_x(F::EHTuple{T,N}, d::Int) where {T,N}
+function loves_ff_transform_x(F::EHTuple{T,N}, Fold::EHTuple, d::Int, Δ::Number) where {T,N}
     E, H = ((Ex,Ez,Ez), (Hx,Hy,Hz)) = F
-    dims = setdiff(1:N, d)
-    
+    Hz_old = Fold[2][3]
+    Hy_old = Fold[2][2]
+    B = boundary_indices(CartesianIndices(Ex), d)[1][1]
+    Ez∞ = zero(T)
+    Ey∞ = zero(T)
+    for I in B
+        Ez∞ += Ez[I] + η₀*(Hy[I]+Hy_old[I])/2
+        Ey∞ += Ey[I] + η₀*(Hz[I]+Hz_old[I])/2
+    end
 
+    out = Array[Ez∞, Ey∞] .* Δ^2
+
+    return out
 end
